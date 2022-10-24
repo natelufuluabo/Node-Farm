@@ -22,17 +22,22 @@ const data = fs.readFileSync(`${__dirname}/dev-data/data.json`);
 const dataObject = JSON.parse(data);
 
 const server = http.createServer((req, res) => {
-    const pathName = req.url;
-    if (pathName === '/' || pathName === '/overview') {
+    const {query, pathname} = url.parse(req.url, true);
+    if (pathname === '/' || pathname === '/overview') {
         res.writeHead(200, {
             'Content-type' : 'text/html'
         });
         const cardsHTML = dataObject.map(product => replaceTemplate(tempCard, product)).join('');
         const output = tempOverview.replace('{%Product_Cards%}', cardsHTML);
         res.end(output);
-    } else if (pathName === '/product') {
-        res.end('This is the product :)');
-    } else if (pathName === '/api') {
+    } else if (pathname === '/product') {
+        res.writeHead(200, {
+            'Content-type' : 'text/html'
+        });
+        const product = dataObject[query.id];
+        const output = replaceTemplate(tempProduct, product);
+        res.end(output);
+    } else if (pathname === '/api') {
         res.writeHead(200, {
             'Content-type' : 'application/json'
         });
